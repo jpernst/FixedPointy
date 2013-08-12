@@ -222,51 +222,59 @@ namespace FixedPointy {
 		}
 
 		public static Fix Exp (Fix value) {
-			return Exp2(value, _log2_E);
+			return Pow(E, value);
 		}
 
 		public static Fix Pow (Fix b, Fix exp) {
-			if (b == 2)
-				return Exp2(exp, Fix.One);
-			else if (b == E)
-				return Exp(exp);
-			else if (b == 10)
-				return Exp2(exp, _log2_10);
-			else
-				return Exp2(exp, Log2(b));
-		}
-
-		static Fix Exp2 (Fix value, Fix scale) {
-			if (value == 0)
+			if (b == 1 || exp == 0)
 				return 1;
 
-			long v = (long)value.Raw * scale.Raw;
-			if (v == (long)Fix.FractionRange << Fix.FractionalBits)
-				return 2;
-			if (Fix.FractionalBits * 2 > 32) {
-				v = (v + (1 << ((Fix.FractionalBits * 2) - 32 - 1))) >> ((Fix.FractionalBits * 2) - 32);
-			} else if (Fix.FractionalBits * 2 < 32)
-				v <<= 32 - (Fix.FractionalBits * 2);
+			int intPow;
+			Fix intFactor;
+			if ((exp.Raw & Fix.FractionMask) == 0) {
+				intPow = (int)((exp.Raw + (Fix.FractionRange >> 1)) >> Fix.FractionalBits);
+				Fix t;
+				int p;
+				if (intPow < 0) {
+					t = 1 / b;
+					p = -intPow;
+				} else {
+					t = b;
+					p = intPow;
+				}
 
-			int intPow = (int)((v + (1L << (32 - 1))) >> 32);
-			Fix intFactor = intPow < 0 ? Fix.One >> -intPow : Fix.One << intPow;
+				intFactor = 1;
+				while (p > 0) {
+					if ((p & 1) != 0)
+						intFactor *= t;
+					t *= t;
+					p >>= 1;
+				}
+
+				return intFactor;
+			}
+
+			exp *= Log(b, 2);
+			b = 2;
+			intPow = (int)((exp.Raw + (Fix.FractionRange >> 1)) >> Fix.FractionalBits);
+			intFactor = intPow < 0 ? Fix.One >> -intPow : Fix.One << intPow;
 
 			long x = (
-					((v - ((long)intPow << 32)) * _ln2Const.Raw)
-					+ (1L << (32 - 1))
-				) >> 32;
+				((exp.Raw - (intPow << Fix.FractionalBits)) * _ln2Const.Raw)
+				+ (Fix.FractionRange >> 1)
+				) >> Fix.FractionalBits;
 			if (x == 0)
 				return intFactor;
 
 			long fracFactor = x;
-			long xp = x;
+			long xa = x;
 			for (int i = 2; i < _invFactConsts.Length; i++) {
-				if (xp == 0)
+				if (xa == 0)
 					break;
-				xp *= x;
-				xp += (1L << (32 - 1));
-				xp >>= 32;
-				long p = xp * _invFactConsts[i].Raw;
+				xa *= x;
+				xa += (1L << (32 - 1));
+				xa >>= 32;
+				long p = xa * _invFactConsts[i].Raw;
 				p += (1L << (32 - 1));
 				p >>= 32;
 				fracFactor += p;
