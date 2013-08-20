@@ -26,7 +26,7 @@ using System.Text;
 
 namespace FixedPointy {
 	public struct Fix {
-		public const int FractionalBits = 12;
+		public const int FractionalBits = 16;
 
 		public const int IntegerBits = sizeof(int) * 8 - FractionalBits;
 		public const int FractionMask = (int)(uint.MaxValue >> IntegerBits);
@@ -58,6 +58,10 @@ namespace FixedPointy {
 			fraction = integer < 0 ? -fraction : fraction;
 
 			return new Fix((integer << FractionalBits) + fraction);
+		}
+
+		public static Fix Ratio (int numerator, int denominator) {
+			return new Fix((int)((((long)numerator << (FractionalBits + 1)) / (long)denominator + 1) >> 1));
 		}
 
 		public static explicit operator double (Fix value) {
