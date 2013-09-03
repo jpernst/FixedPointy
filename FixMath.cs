@@ -100,15 +100,15 @@ namespace FixedPointy {
 			if (value.Raw == 0)
 				return 0;
 
-			return new Fix((SqrtULong((ulong)value.Raw << (Fix.FractionalBits + 2)) + 1) >> 1);;
+			return new Fix((int)(SqrtULong((ulong)value.Raw << (Fix.FractionalBits + 2)) + 1) >> 1);
 		}
 
-		static int SqrtULong (ulong N) {
+		internal static uint SqrtULong (ulong N) {
 			ulong x = 1L << ((31 + (Fix.FractionalBits + 2) + 1) / 2);
 			while (true) {
 				ulong y = (x + N / x) >> 1;
 				if (y >= x)
-					return (int)x;
+					return (uint)x;
 				x = y;
 			}
 		}

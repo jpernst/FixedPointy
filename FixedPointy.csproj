@@ -72,6 +72,8 @@
     <Compile Include="FixConst.cs" />
     <Compile Include="FixMath.cs" />
     <Compile Include="FixMathConsts.cs" />
+    <Compile Include="FixVec2.cs" />
+    <Compile Include="FixTrans2.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
