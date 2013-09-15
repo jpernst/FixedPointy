@@ -39,7 +39,7 @@ namespace FixedPointy {
 		}
 
 		public static implicit operator Fix (FixConst value) {
-			return new Fix((int)((value.Raw + (1 << (32 - Fix.FractionalBits - 1))) >> (32 - Fix.FractionalBits)));
+			return new Fix((int)((value.Raw + (1 << (32 - Fix.FRACTIONAL_BITS - 1))) >> (32 - Fix.FRACTIONAL_BITS)));
 		}
 
 		public static explicit operator int (FixConst value) {

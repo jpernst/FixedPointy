@@ -26,46 +26,54 @@ using System.Text;
 
 namespace FixedPointy {
 	public struct Fix {
-		public const int FractionalBits = 16;
+		internal const int FRACTIONAL_BITS = 16;
 
-		public const int IntegerBits = sizeof(int) * 8 - FractionalBits;
-		public const int FractionMask = (int)(uint.MaxValue >> IntegerBits);
-		public const int IntegerMask = (int)(-1 & ~FractionMask);
-		public const int FractionRange = FractionMask + 1;
-		public const int MinInteger = int.MinValue >> FractionalBits;
-		public const int MaxInteger = int.MaxValue >> FractionalBits;
+		internal const int INTEGER_BITS = sizeof(int) * 8 - FRACTIONAL_BITS;
+		internal const int FRACTION_MASK = (int)(uint.MaxValue >> INTEGER_BITS);
+		internal const int INTEGER_MASK = (int)(-1 & ~FRACTION_MASK);
+		internal const int FRACTION_RANGE = FRACTION_MASK + 1;
+		internal const int MIN_INTEGER = int.MinValue >> FRACTIONAL_BITS;
+		internal const int MAX_INTEGER = int.MaxValue >> FRACTIONAL_BITS;
 
 		public static readonly Fix Zero = new Fix(0);
-		public static readonly Fix One = new Fix(FractionRange);
+		public static readonly Fix One = new Fix(FRACTION_RANGE);
 		public static readonly Fix MinValue = new Fix(int.MinValue);
 		public static readonly Fix MaxValue = new Fix(int.MaxValue);
 		public static readonly Fix Epsilon = new Fix(1);
 
 		static Fix () {
-			if (FractionalBits < 8)
+			if (FRACTIONAL_BITS < 8)
 				throw new Exception("Fix must have at least 8 fractional bits.");
-			if (IntegerBits < 10)
+			if (INTEGER_BITS < 10)
 				throw new Exception("Fix must have at least 10 integer bits.");
-			if (FractionalBits % 2 == 1)
+			if (FRACTIONAL_BITS % 2 == 1)
 				throw new Exception("Fix must have an even number of fractional and integer bits.");
 		}
+
+		public static int FractionalBits { get { return FRACTIONAL_BITS; } }
+		public static int IntegerBits { get { return INTEGER_BITS; } }
+		public static int FractionMask { get { return FRACTION_MASK; } }
+		public static int IntegerMask { get { return INTEGER_MASK; } }
+		public static int FractionRange { get { return FRACTION_RANGE; } }
+		public static int MinInteger { get { return MIN_INTEGER; } }
+		public static int MaxInteger { get { return MAX_INTEGER; } }
 
 		public static Fix Mix (int integer, int numerator, int denominator) {
 			if (numerator < 0 || denominator < 0)
 				throw new ArgumentException("Ratio must be positive.");
 
-			int fraction = ((int)((long)FractionRange * numerator / denominator) & FractionMask);
+			int fraction = ((int)((long)FRACTION_RANGE * numerator / denominator) & FRACTION_MASK);
 			fraction = integer < 0 ? -fraction : fraction;
 
-			return new Fix((integer << FractionalBits) + fraction);
+			return new Fix((integer << FRACTIONAL_BITS) + fraction);
 		}
 
 		public static Fix Ratio (int numerator, int denominator) {
-			return new Fix((int)((((long)numerator << (FractionalBits + 1)) / (long)denominator + 1) >> 1));
+			return new Fix((int)((((long)numerator << (FRACTIONAL_BITS + 1)) / (long)denominator + 1) >> 1));
 		}
 
 		public static explicit operator double (Fix value) {
-			return (double)(value._raw >> FractionalBits) + (value._raw & FractionMask) / (double)FractionRange;
+			return (double)(value._raw >> FRACTIONAL_BITS) + (value._raw & FRACTION_MASK) / (double)FRACTION_RANGE;
 		}
 
 		public static explicit operator float (Fix value) {
@@ -74,13 +82,13 @@ namespace FixedPointy {
 
 		public static explicit operator int (Fix value) {
 			if (value._raw > 0)
-				return value._raw >> FractionalBits;
+				return value._raw >> FRACTIONAL_BITS;
 			else
-				return (value._raw + FractionMask) >> FractionalBits;
+				return (value._raw + FRACTION_MASK) >> FRACTIONAL_BITS;
 		}
 
 		public static implicit operator Fix (int value) {
-			return new Fix(value << FractionalBits);
+			return new Fix(value << FRACTIONAL_BITS);
 		}
 
 		public static bool operator == (Fix lhs, Fix rhs) {
@@ -124,11 +132,11 @@ namespace FixedPointy {
 		}
 
 		public static Fix operator * (Fix lhs, Fix rhs) {
-			return new Fix((int)(((long)lhs._raw * (long)rhs._raw + (FractionRange >> 1)) >> FractionalBits));
+			return new Fix((int)(((long)lhs._raw * (long)rhs._raw + (FRACTION_RANGE >> 1)) >> FRACTIONAL_BITS));
 		}
 
 		public static Fix operator / (Fix lhs, Fix rhs) {
-			return new Fix((int)((((long)lhs._raw << (FractionalBits + 1)) / (long)rhs._raw + 1) >> 1));
+			return new Fix((int)((((long)lhs._raw << (FRACTIONAL_BITS + 1)) / (long)rhs._raw + 1) >> 1));
 		}
 
 		public static Fix operator % (Fix lhs, Fix rhs) {
@@ -166,14 +174,14 @@ namespace FixedPointy {
 			int abs = (int)this;
 			abs = abs < 0 ? -abs : abs;
 			sb.Append(abs.ToString());
-			ulong fraction = (ulong)(_raw & FractionMask);
+			ulong fraction = (ulong)(_raw & FRACTION_MASK);
 			if (fraction == 0)
 				return sb.ToString();
 
-			fraction = _raw < 0 ? FractionRange - fraction : fraction;
+			fraction = _raw < 0 ? FRACTION_RANGE - fraction : fraction;
 			fraction *= 1000000L;
-			fraction += FractionRange >> 1;
-			fraction >>= FractionalBits;
+			fraction += FRACTION_RANGE >> 1;
+			fraction >>= FRACTIONAL_BITS;
 
 			sb.Append(System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
 			sb.Append(fraction.ToString("D6").TrimEnd('0'));
