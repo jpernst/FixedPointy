@@ -25,7 +25,10 @@ using System;
 
 namespace FixedPointy {
 	public struct FixTrans2 {
-		public static readonly FixTrans2 Identity = new FixTrans2(1, 0, 0, 0, 1, 0);
+		public static readonly FixTrans2 Identity = new FixTrans2(
+			1, 0, 0,
+			0, 1, 0
+		);
 
 		public static FixTrans2 operator * (FixTrans2 lhs, FixTrans2 rhs) {
 			return new FixTrans2(
@@ -70,7 +73,10 @@ namespace FixedPointy {
 
 		Fix _m11, _m21, _m12, _m22, _m13, _m23;
 
-		public FixTrans2 (Fix m11, Fix m12, Fix m13, Fix m21, Fix m22, Fix m23) {
+		public FixTrans2 (
+			Fix m11, Fix m12, Fix m13,
+			Fix m21, Fix m22, Fix m23
+		) {
 			_m11 = m11; _m12 = m12; _m13 = m13;
 			_m21 = m21; _m22 = m22; _m23 = m23;
 		}
