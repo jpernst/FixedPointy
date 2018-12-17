@@ -50,7 +50,7 @@ namespace FixedPointy {
 		}
 
 		public static implicit operator FixConst (int value) {
-			return new FixConst(value << 32);
+			return new FixConst((long)value << 32);
 		}
 
 		public static bool operator == (FixConst lhs, FixConst rhs) {
