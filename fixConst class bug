@@ -1,0 +1,10 @@
+bug in FixConst:
+public static implicit operator FixConst (int value) {
+            return new FixConst(value << 32);
+		}
+    
+    Cast to long:
+    
+    public static implicit operator FixConst (int value) {
+            return new FixConst((long)value << 32);
+		}
